@@ -2,7 +2,7 @@
 
 Is a light weight, portable app written in AutoHotkey that allows you to Change Folder Icons from a Quick and Simple GUI.
 
-
+download in the realeased secton --> 
 
 more readme update coming soon...
 
