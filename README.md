@@ -11,8 +11,10 @@ for now... screenshots
 # Screenshots
 
 ## MAIN GUI
-![gui full Change_Folder_ICO_2025-03-10_09-05-55PM_610x706](https://github.com/user-attachments/assets/3e8289f2-fe1a-49f8-af9e-63422eadaae2)
+![image](https://github.com/user-attachments/assets/4edb10e2-bac1-4dc2-b9e2-ea5c699e1b7b)
 
+
+![image](https://github.com/user-attachments/assets/bb85cc64-601c-4ea3-9f3d-315378b329b9)
 
 ### GUI with optional extras hidden
 ![gui with extras turned off Change_Folder_ICO_2025-03-10_09-09-02PM_610x558](https://github.com/user-attachments/assets/89b4b1d8-b2b6-4c29-9bd9-381f063a72ed)
