@@ -2,7 +2,7 @@
 
 Is a light weight, portable app written in AutoHotkey that allows you to Change Folder Icons from a Quick and Simple GUI.
 
-download in the realeased secton --> 
+download in the realease secton --> 
 
 more readme update coming soon...
 
@@ -22,8 +22,6 @@ for now... screenshots
 ### About MsgBox
 ![image](https://github.com/user-attachments/assets/bb85cc64-601c-4ea3-9f3d-315378b329b9)
 
-### GUI with optional extras hidden
-![gui with extras turned off Change_Folder_ICO_2025-03-10_09-09-02PM_610x558](https://github.com/user-attachments/assets/89b4b1d8-b2b6-4c29-9bd9-381f063a72ed)
 
 ## Menus
 
