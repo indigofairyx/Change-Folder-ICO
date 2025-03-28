@@ -31,7 +31,8 @@ for now... screenshots
 
 ### Live Hotkeys \\ Quick Action Menu
 
-![menu hotekys Change_Folder_ICO_2025-03-10_09-06-07PM_610x707](https://github.com/user-attachments/assets/6d9eb4fe-6920-438f-9b29-85df81131e81)
+![live hotkey menu](https://github.com/user-attachments/assets/09245e3f-6bef-46e6-8af2-c56b891552c2)
+
 
 ### History of Changed Folders & Icons Menu
 
