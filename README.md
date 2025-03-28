@@ -10,10 +10,16 @@ for now... screenshots
 
 # Screenshots
 
-## MAIN GUI
-![image](https://github.com/user-attachments/assets/4edb10e2-bac1-4dc2-b9e2-ea5c699e1b7b)
+## MAIN GUI with Light & Dark Themes
+
+![Change_Folder_ICO_2025-03-28_01-11-45AM_613x740](https://github.com/user-attachments/assets/e20327e9-82b4-4214-a974-7177dcbf83ae)
+
+![change folder ico new light mode theme AutoHotkeyU64_UIA_2025-03-27_10-22-03PM_615x767](https://github.com/user-attachments/assets/a02945cf-d561-4ff0-8cfa-34976aba2b9c)
 
 
+
+
+### About MsgBox
 ![image](https://github.com/user-attachments/assets/bb85cc64-601c-4ea3-9f3d-315378b329b9)
 
 ### GUI with optional extras hidden
@@ -33,7 +39,9 @@ for now... screenshots
 
 ![menu history Change_Folder_ICO_2025-03-10_09-08-03PM_611x706](https://github.com/user-attachments/assets/44b48c30-dfd7-4410-bbf8-51ac02212ba6)
 
-## Load from folder tabs menu ** Special menu For [Directory Opus](https://www.gpsoft.com.au) Users
+## Load from folder tabs menu ** Special Menu For [Directory Opus](https://www.gpsoft.com.au) Users
+This menu allows you to load open tabs that are open in DO without changing windows to copy the paths.
+If your DO user there's a [post on the forum](https://resource.dopus.com/t/change-folder-ico/54858) with a button I made to send folders to CFICO from DO with one click!
 
 ![menu load folder from dopus tab Change_Folder_ICO_2025-03-10_09-06-59PM_611x706](https://github.com/user-attachments/assets/997b31c7-022a-4ee6-8416-fab81d898e74)
 
