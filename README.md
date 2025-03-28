@@ -39,7 +39,8 @@ for now... screenshots
 
 ## Load from folder tabs menu ** Special Menu For [Directory Opus](https://www.gpsoft.com.au) Users
 This menu allows you to load open tabs that are open in DO without changing windows to copy the paths.
-If your DO user there's a [post on the forum](https://resource.dopus.com/t/change-folder-ico/54858) with a button I made to send folders to CFICO from DO with one click!
+
+If you're DO user there's a [post on the forum](https://resource.dopus.com/t/change-folder-ico/54858) with a button I made to send folders to CFICO from DO with one click!
 
 ![menu load folder from dopus tab Change_Folder_ICO_2025-03-10_09-06-59PM_611x706](https://github.com/user-attachments/assets/997b31c7-022a-4ee6-8416-fab81d898e74)
 
