@@ -10,7 +10,8 @@ global fileversion
 filegetversion, fileversion, %a_scriptfullpath%
 #SingleInstance Force
 #Persistent
-#Requires Autohotkey v1.1.33+
+; #Requires Autohotkey v1.1.33+
+#Requires Autohotkey v1.1+
 
 CoordMode, tooltip, mouse
 
@@ -185,6 +186,9 @@ if !Fileexist(Icon)
 	}
 
 }
+
+if !Fileexist(changelog)
+	gosub Makechangelog
 ;--------------------------------------------------
 
 MenuDark(Dark:=2) { ;<<==<-CHANGE DEFAULT HERE. Only the # has to be changed.
@@ -235,8 +239,10 @@ ScriptName := "Change Folder ICO"
 global ScriptName
 Global 1stRelease
 1stRelease := "v.2025.03.10"
-
-LastUpdate := "v.2025.04.22"
+; if !(A_IsCompiled)
+	; Fileversion := LastUpdate
+; msgbox %fileversion%
+LastUpdate := "v.2025.05.31"
 global LastUpdate
 Description := "Change Folder Icons from a Quick and Simple GUI"
 global Description
@@ -268,17 +274,29 @@ INIReadSection("Settings")
 ; if (A_OSVersion >= "10.0.22000")
     ; { ;; if Win 11 	MsgBox, This is likely Windows 11
 	; }
-	
-OSversion:
+iniread, runcount, %inifile%, Logging, CFIcoRunCount, 0
+runcount++
+iniwrite, %runcount%, %inifile%, Logging, CFIcoRunCount
+FormatTime, A_Time,, Time
+iniwrite, %A_MM%/%A_DD%/%A_Year% @ %A_Time%, %inifile%, Logging, CFIcoLastRun
+
 if (A_OSVersion = "10.0.22000" or A_OSVersion >= "10.0.22000")
     { ;; if Win 11 	MsgBox, This is likely Windows 11
-		MSPaint = C:\Program Files\WindowsApps\Microsoft.Paint_11.2302.20.0_x64__8wekyb3d8bbwe\PaintApp\mspaint.exe
+		if FileExist("C:\Program Files\WindowsApps\Microsoft.Paint_11.2302.20.0_x64__8wekyb3d8bbwe\PaintApp\mspaint.exe")
+			MSPaint = C:\Program Files\WindowsApps\Microsoft.Paint_11.2302.20.0_x64__8wekyb3d8bbwe\PaintApp\mspaint.exe
+		else
+			MSPaint = C:\Windows\System32\mspaint.exe
+
+		IniWrite, %A_MM%/%A_DD%/%A_Year% @ %A_Time%, %inifile%, Logging, CFIcoLast11Run
 	}
 else
     { ;; if Win 10	MsgBox, Probably Windows 10 or earlier
 		MSPaint = C:\Windows\System32\mspaint.exe
+		IniWrite, %A_MM%/%A_DD%/%A_Year% @ %A_Time%, %inifile%, Logging, CFIcoLast10Run
 	}
-; iniwrite, %fileversion%, %inifile%, Settings, FileVersion  ;; IGNORE 4 SHARE
+; iniwrite, %LastUpdate%, %inifile%, Logging, CFIcoFileVersion  ;; IGNORE 4 SHARE
+
+
 if (StartAsAdmin)
 	gosub RunAsAdmin
 
@@ -628,15 +646,15 @@ DllCall("uxtheme\SetWindowTheme", "ptr", hwndre , "str", "DarkMode_Explorer", "p
 AddTooltip(hrestbut, "Reload CFI to Clear & Reset all input boxes")
 GuiButtonIcon(hrestbut, "Icons\reload.ico", 1, "s20 a1 r10")
 
-Gui, +hWndhMainWnd -MaximizeBox +Border +LastFound ; +E0x10 +0x200
+Gui, +hWndhMainWnd -MaximizeBox +Border +LastFound +E0x10 ; +0x200 ; GuiDropFiles
 
 
 if (StartOnTop)
 	Gui,  +AlwaysOnTop 
 if (RememberWindowPos)
 	{
-		IniRead, X, %IniFile%, WindowPos, X, 500
-		IniRead, Y, %IniFile%, WindowPos, Y, 500
+		IniRead, X, %IniFile%, Settings, X, 500
+		IniRead, Y, %IniFile%, Settings, Y, 500
 		Gui, Show, x%X% y%Y%, - Change Folder .Ico -
 	}
 else
@@ -858,14 +876,14 @@ Gui, Add, Button, X+M vre gReload h22 w175 hwndhrestbut , Reload App - [%reloadC
 AddTooltip(hrestbut, "Reload CFI to Clear & Reset all input boxes")
 GuiButtonIcon(hrestbut, "Icons\reload.ico", 1, "s20 a1 r10")
 
-Gui, +hWndhMainWnd -MaximizeBox +Border +LastFound ; +E0x10 +0x200
+Gui, +hWndhMainWnd -MaximizeBox +Border +LastFound +E0x10 ; +0x200 ; GuiDropFiles
 
 if (StartOnTop)
 	Gui,  +AlwaysOnTop 
 if (RememberWindowPos)
 	{
-		IniRead, X, %IniFile%, WindowPos, X, 500
-		IniRead, Y, %IniFile%, WindowPos, Y, 500
+		IniRead, X, %IniFile%, Settings, X, 500
+		IniRead, Y, %IniFile%, Settings, Y, 500
 		Gui, Show, x%X% y%Y%, - Change Folder .Ico -
 	}
 else
@@ -1054,43 +1072,51 @@ SetTimer, RemoveTooltip, -3000
 return
 
 
-; GuiDropFiles:
-;; this just doesn't work. think it's a limitation of ahk v1 for having the gui inside a subroutine...
-;; Guidropfiles: --> Launched whenever files/folders are dropped onto the window as part of a drag-and-drop operation (BUT IF THE LABEL IS ALREADY RUNNING, DROP EVENTS ARE IGNORED).
-; Gui , Submit , NoHide
+GuiDropFiles:
+; this just doesn't work. think it's a limitation of ahk v1 for having the gui inside a subroutine...
+; Guidropfiles: --> Launched whenever files/folders are dropped onto the window as part of a drag-and-drop operation (BUT IF THE LABEL IS ALREADY RUNNING, DROP EVENTS ARE IGNORED).
+Gui , Submit , NoHide
 
 ; Loop, Parse, A_GuiEvent, `n ; EXAMPLE #1:
 ; {
-    ; MsgBox, 4,, File number %A_Index% is:`n%A_LoopField%.`n`nContinue?
+    ; MsgBox, 4,, File number %A_Index% is:`n%A_LoopField%`n`nContinue?
     ; IfMsgBox, No, break
 ; }
-; Loop, Parse, A_GuiEvent, `n ; EXAMPLE #2: To extract only the first file, follow this example:
+Loop, Parse, A_GuiEvent, `n ; EXAMPLE #2: To extract only the first file, follow this example:
+{
+    FirstFile := A_LoopField
+    break
+}
+
+splitpath, firstfile, filename, dir, ext
+; msgbox dropped file: %firstfile%`n`nfilename: %filename% `ndir: %dir%`next: %ext%
+
+if (ext = "ico")
+	{
+		GuiControl,, IconPath, %FirstFile%    ; Update Icon Path (modify if needed)
+		goto PreviewIcon
+	}
+else
+	{
+		if InStr(FileExist(FirstFile), "D")  ; If it's a directory
+			{
+				FolderPath := FirstFile
+				GuiControl,, FolderPath, %FirstFile%  ; Update Folder Path
+			}
+		else
+			{
+				FolderPath := SubStr(FirstFile, 1, InStr(FirstFile, "\",, 0))  ; Extract parent folder
+				GuiControl,, FolderPath, %FolderPath%  ; Update GUI with folder path
+			}
+		goto LoadFolderPath
+}
+; if (filename = "desktop.ini")
 ; {
-    ; FirstFile := A_LoopField
-    ; break
+; folderpath := dir
+; goto loadFolderPath
 ; }
-; msgbox dropped file: %firstfile%
-; splitpath, firstfile, , , ext
-; if (ext = "ico")
-	; {
-		; GuiControl,, IconPath, %FirstFile%    ; Update Icon Path (modify if needed)
-		; goto PreviewIcon
-	; }
-; else
-	; {
-		; if InStr(FileExist(FirstFile), "D")  ; If it's a directory
-			; {
-				; FolderPath := FirstFile
-				; GuiControl,, FolderPath, %FirstFile%  ; Update Folder Path
-			; }
-		; else
-			; {
-				; FolderPath := SubStr(FirstFile, 1, InStr(FirstFile, "\",, 0))  ; Extract parent folder
-				; GuiControl,, FolderPath, %FolderPath%  ; Update GUI with folder path
-			; }
-		; goto LoadFolderPath
-; }
-; Return 
+
+Return 
 
 
 LoadFolderPath: ;; load the pasted folder path , read existing icon info from a desktop.ini if found
@@ -1764,8 +1790,8 @@ RememberWinPos() ;; function
 {
 	global
     WinGetPos, X, Y,,, A  ; Get current window position
-    IniWrite, %X%, %IniFile%, WindowPos, X
-    IniWrite, %Y%, %IniFile%, WindowPos, Y
+    IniWrite, %X%, %IniFile%, Settings, X
+    IniWrite, %Y%, %IniFile%, Settings, Y
 	sleep 200
 }
 ; return
@@ -1993,10 +2019,35 @@ if FileExist(dopusrt)
 	}
 return
 OpenIconLib:
-run %IconLibrary%
+try run %IconLibrary%
 return
+
+copyworkingfolder:
+clipboard =
+sleep 40
+clipboard = %folderpath%
+clipwait,0.5
+if (clipboard != "")
+{
+tooltip Copied Working Folder Dir
+SetTimer, RemoveToolTip, -1500
+}
+return
+
 openworkingfolder:
 run "%folderpath%"
+return
+
+CopyIconPath:
+clipboard =
+sleep 40
+clipboard = %iconpath%
+clipwait,0.5
+if (clipboard != "")
+{
+tooltip Copied Icon Path
+SetTimer, RemoveToolTip, -1500
+}
 return
 openiconfolder:
 run "%icodir%"
@@ -2312,16 +2363,59 @@ if !Fileexist(desktopini)
 	SetTimer, RemoveTooltip, -2000	
 	return
 	}
-if (AskMeToConfirmOnSave)
-		{
-			MsgBox, 4148, - Change Folder .Ico - ! Delete Warning, You are deleting a system file:`n%desktopini%`n`nThis will reset the icon and any other settings in it. This is not recommend for Windows Actual system folders.`n`nContinue... ??? 
-			IfMsgBox NO
-				return
-		}	
+; if (AskMeToConfirmOnSave)
+		; {
+			
+			; MsgBox, 4148, - Change Folder .Ico - ! Delete Warning, You are deleting a system file:`n%desktopini%`n`nThis will reset the icon and any other settings in it. This is not recommend for Windows Actual system folders.`n`nContinue... ??? 
+			; IfMsgBox NO
+				; return
+
+SetTimer, deletedesktopinibuttons, -50
+MsgBox, 262451,  - Change Folder .Ico - ! Delete Warning,  You are deleting a system file:`n%desktopini%`n`nThis will reset the icon and any other settings in it. This is not recommend for Windows system folders.`n`n* Select *Delete All* to remove all desktop.ini's in this folder tree. -- You should only do this if you applied a custom icon to all subfolders.`n`nContinue... ???
+IfMsgBox Yes ; delete all
+	{
+		Gosub DeleteAllINIs
+		gosub loadFolderPath
+	}
+IfMsgBox No ; delete one, active folder
+	{
+		FileRecycle, %desktopini%
+		FileSetAttrib, -R, %folderpath%, 2
+		gosub loadFolderPath
+	}
+IfMsgBox Cancel
+	{
+		return
+	}
+
+Return
+
+; }
+		
+; FileRecycle, %desktopini%
+; FileSetAttrib, -R, %folderpath%, 2
+gosub loadFolderPath
+return
+
+DeleteOneINI:
 FileRecycle, %desktopini%
 FileSetAttrib, -R, %folderpath%, 2
 gosub loadFolderPath
 return
+
+DeleteAllINIs:
+RecycleALLDesktopINIs(folderpath)
+return
+
+deletedesktopinibuttons:
+IfWinNotExist,  - Change Folder .Ico - ! Delete Warning
+	Return
+SetTimer, deletedesktopinibuttons, Off
+WinActivate
+ControlSetText, Button1, *Delete &All*
+ControlSetText, Button2, &Delete
+ControlSetText, Button3, &No
+Return
 
 applyiconnow: ;; gpt ;; old ;; oktd
     Desktopinifile := foldernewicon "\desktop.ini"
@@ -2347,42 +2441,44 @@ applyiconnow: ;; gpt ;; old ;; oktd
 
 return
 ;--------------------------------------------------
-SetIconALLFOLDERS(folder, desktopini)  
+SetIconALLFOLDERS(folder, desktopini)    ;; Function: Copy existing desktop.ini to all subfolders
 {
-    ; Ensure the source desktop.ini exists before proceeding
-    if !FileExist(desktopini)
+
+    if !FileExist(desktopini)    ; Ensure the source desktop.ini exists before proceeding
     {
         MsgBox, 16, Error, The source desktop.ini file does not exist!`n`nOperation Canceled.
         return
     }
    
-    ; Loop, %folder%\*, 2 ; Loop through all subfolders
-	Loop, %folder%\*, 2, 1  ; The "1" makes it search all subdirectories
+	Loop, %folder%\*, 2, 1  ; The "1" makes it search all subdirectories    ; Loop, %folder%\*, 2 ; Loop through all subfolders
     {
         targetDesktopIni := A_LoopFileFullPath . "\desktop.ini"
 
-        ; Copy desktop.ini to each subfolder
-        FileCopy, %desktopini%, %targetDesktopIni%, 1  ; Overwrite existing ini
+        FileCopy, %desktopini%, %targetDesktopIni%, 1  ; 1= Overwrite existing ini ; Copy desktop.ini to each subfolder
 
-        ; Apply necessary attributes
-        FileSetAttrib, +SH, %targetDesktopIni%  ; Hide + System for desktop.ini
+        FileSetAttrib, +SH, %targetDesktopIni%    ; Apply necessary attributes  ; Hide + System for desktop.ini
         FileSetAttrib, +R, %A_LoopFileFullPath%  ; Read-only for the folder
 		sleep 10
-        ; Force Windows to refresh the folder icon by setting it as a system folder
-        ; FileSetAttrib, +S, %A_LoopFileFullPath%  
-
-        ; Debug message (optional)
-        ; MsgBox, Copied %desktopini% to %targetDesktopIni%
     }
+}
 
-    ; Refresh Windows Explorer to apply the changes
-    ; Run, ie4uinit.exe -show
-    ; Run, explorer.exe /n`,%folder%  ; Open the folder to force icon update
+RecycleALLDesktopINIs(folder)   ;; Function: Recycle all desktop.ini files in subfolders and remove +R attribute from folders
+{
+	;; usage RecycleALLDesktopINIs("D:\MyCustomFolders")
+    Loop, Files, %folder%\desktop.ini, R  ; R = recursive
+    {
+        FileRecycle, %A_LoopFileFullPath%
+        Sleep, 10
+
+        SplitPath, A_LoopFileFullPath, , folderPath
+        FileSetAttrib, -R, %folderPath%  ; Remove Read-only from the folder
+        Sleep, 10
+    }
 }
 
 /*
 
- SetIconALLFOLDERS(folder, desktopini)  ;; Function: Copy existing desktop.ini to all subfolders
+SetIconALLFOLDERS(folder, desktopini)  ;; Function: Copy existing desktop.ini to all subfolders -OG-
 {
     ; Ensure the source desktop.ini exists before proceeding
     if !FileExist(desktopini)
@@ -2405,9 +2501,17 @@ SetIconALLFOLDERS(folder, desktopini)
 
         ; Debugging message (optional)
         MsgBox, Copied %desktopini% to %targetDesktopIni%
+		        ; Force Windows to refresh the folder icon by setting it as a system folder
+        ; FileSetAttrib, +S, %A_LoopFileFullPath%  
+
+        ; Debug message (optional)
+        ; MsgBox, Copied %desktopini% to %targetDesktopIni%
     }
     
     sleep 200
+	
+    ; Run, ie4uinit.exe -show    ; Force Refresh Windows Explorer to apply the changes (moved this into its own optional fucntion\label)
+    ; Run, explorer.exe /n`,%folder%  ; Open the folder to force icon update
 } 
 
 */
@@ -2415,7 +2519,7 @@ SetIconALLFOLDERS(folder, desktopini)
 Setfoldericonsinallsubs: ; gpt, not being used atm but is good working option.
 ;; ** I've only texted this with `.ico` files, use caution if your wanting to set an icon from a `.dll` or `.exe`
 ; rootFolder := "C:\Users\CLOUDEN\test 1" ; Change this to your desired root folder
-; iconPath := "C:\xsysicons\vs code icons ico\check white file_type_light_testcafe_32x32.ico" ; Change this to your desired icon file   \Documents\AutoHotkey
+; iconPath := "X:\xSysIcons\vs code icons ico\check white file_type_light_testcafe_32x32.ico" ; Change this to your desired icon file   \Documents\AutoHotkey
 
 FileSelectFolder, rootFolder, *c:\Users\%a_username%,6,Select A Folder that you want to set a custom Icon to...
 if !FileExist(rootfolder)
@@ -2953,7 +3057,7 @@ FastSetWarning=1
 ForceApplyNOW=1
 HideTooltips=0
 iconerror=
-IconLibrary=C:\xSysIcons
+IconLibrary=X:\xSysIcons
 RememberHistory=1
 RememberWindowPos=0
 ShowAppBar=1
@@ -3020,7 +3124,7 @@ dopusrt=C:\Program Files\GPSoftware\Directory Opus\dopusrt.exe
 IconViewer=C:\Program Files\XnViewMP\xnviewmp.exe
 IconConverter=C:\Program Files\XnConvert\xnconvert.exe
 IconEditor1=C:\Program Files\Adobe\Adobe Photoshop CS6 (64 Bit)\Photoshop.exe
-IconEditor2=C:\PFP\icofx3\icofx3.exe
+IconEditor2=X:\PFP\icofx3\icofx3.exe
 IconEditor3=C:\Program Files\Adobe\Adobe Photoshop 2020\photoshop.exe
 IconEditor4=C:\Program Files\GIMP 3\bin\gimp-3.exe
 EveryThing15a=C:\Program Files\Everything 1.5a\Everything64.exe
@@ -3034,16 +3138,28 @@ Y=500
 
 ), %inifile%
 sleep 1000
+Return
 
+Makechangelog:
 FileAppend,
 (
+
+;------------------------- v.2025.05.31
+
+++ Added drag-and-drop capability to the gui! .ico files will automatically be loaded into the icon path field. folders ( or any other file that's not an ico ) will be split at the last Directory and loaded into the folder field.
+
+! fixed copy Folder & Icons paths options on the GUI Right-Click menu
+
++ added quick actions & Hotkeys as a sub-menu to the GUI Right-Click menu
+
++! added an option to **Delete All** desktop.ini's in folder tree. this should only be use if you used this app to apply the same icons to all subfolders in a folder tree
 
 
 ;------------------------- v.2025.04.22
 
 + added a right-click context menu to gui.
 
-! fixed an error accessing paint.exe between win 10 & win 11
+! fixed an error accessing MSpaint.exe between win 10 & win 11
 
 ! changed\fixed some windows.dll icons on to gui to local so they'd between windows versions
 
@@ -3700,8 +3816,8 @@ if FileExist(clipboard)
 	SplitPath,clipboard,,,ext
 	if (ext = "ico")
 		{
-			menu, g, add, Clipboard Check, guimenu
-			menu, g, icon, Clipboard Check, %icons%\clipboardicon.ico,,24
+			menu, g, add, Clipboard Check ...., guimenu
+			menu, g, icon, Clipboard Check ...., %icons%\clipboardicon.ico,,24
 			Menu, g, add, Paste Icon Path into GUI`t%CheckClipboard4ICO%, CheckClipboard4ICO
 			menu, g, icon, Paste Icon Path into GUI`t%CheckClipboard4ICO%, % Getfileicon(clipboard)
 			
@@ -3712,8 +3828,8 @@ if FileExist(clipboard)
 	else
 	{
 		FileGetAttrib, clipboardcheck, %clipboard%
-			menu, g, add, Clipboard Check, guimenu
-			menu, g, icon, Clipboard Check, %icons%\checkclipboard.ico
+			menu, g, add, Clipboard Check ...., guimenu
+			menu, g, icon, Clipboard Check ...., %icons%\checkclipboard.ico
 		if InStr(clipboardcheck, "D")
 			{
 				menu, g, add, Paste Folder Path Into GUI`t%CheckClipboard4FOLDER%, CheckClipboard4FOLDER
@@ -3732,8 +3848,8 @@ if FileExist(clipboard)
 }
 if Fileexist(currentIconPath) || FileExist(currentFolderpath)
 	{
-	menu, g, add, Working Fields Options, guimenu
-	menu, g, icon, Working Fields Options, %icons%\openfolders.ico,,24
+	menu, g, add, Working Fields Options ...., guimenu
+	menu, g, icon, Working Fields Options ...., %icons%\openfolders.ico,,24
 	menu, g, add, ; line -------------------------
 	}
 	
@@ -3741,20 +3857,26 @@ if Fileexist(currentIconPath) || FileExist(currentFolderpath)
 ;; shell copy clipboard icon, C:\Windows\system32\shell32.dll, 261
 if FileExist(currentFolderpath)
 	{
-		Menu, g, add, Copy Current Folder Path, donothing
-		Menu, g, icon, Copy Current Folder Path, %icons%\checkclipboard.ico
+		Menu, g, add, Copy Current Folder Path, copyworkingfolder
+		Menu, g, icon, Copy Current Folder Path, C:\Windows\system32\shell32.dll,135 ; %icons%\checkclipboard.ico
 		Menu, g, add, Open Current Folder Path, openworkingfolder
 		if Fileexist(dopus)
 			Menu, g, icon, Open Current Folder Path, %dopus%
 		else
 			Menu, g, icon, Open Current Folder Path, Explorer.exe
 		; menu, g, icon, Copy Current Icon Path, % Getfileicon(currentIconPath)
+		if Fileexist(desktopini)
+			{
+				menu, g, add, Edit Current Folder's desktop.ini, openini
+				menu, g, icon, Edit Current Folder's desktop.ini, %icons%\iniicon.ico
+				; menu, g, add, ; line -------------------------
+			}
 		menu, g, add, ; line -------------------------
 	}
 if Fileexist(currentIconPath)
 	{
 		splitpath, currenticonpath,,cipdir
-		menu, g, add, Copy Current Icon Path, donothing
+		menu, g, add, Copy Current Icon Path, CopyIconPath
 		menu, g, icon, Copy Current Icon Path, % Getfileicon(currentIconPath)
 		menu, g, add, Open Current Icon Paths Folder, openiconfolder
 				if Fileexist(dopus)
@@ -3768,12 +3890,6 @@ if (folderpath = "" && iconpath = "")
 		menu, g, add, Both path fields are empty., donothing
 		menu, g, icon, Both path fields are empty., %iconerror%,,24
 		; menu, g, Default, Both path fields are empty.
-		menu, g, add, ; line -------------------------
-	}
-if Fileexist(desktopini)
-	{
-		menu, g, add, Edit Current Folders desktop.ini, openini
-		menu, g, icon, Edit Current Folders desktop.ini, %icons%\iniicon.ico
 		menu, g, add, ; line -------------------------
 	}
 ; ini check? edit desktop.ini?
@@ -3796,6 +3912,9 @@ else
 	}
 menu, g, add, Reload CFIco`t%ReloadCFI%, ReloadCFI
 menu, g, icon, Reload CFIco`t%ReloadCFI%, %icons%\reload.ico, reload
+menu, g, add, ; line -------------------------
+Menu, g, add, Quick Actions && Hotkeys Menu >>>`t%Showhotkeymenu%, :k
+Menu, g, icon, Quick Actions && Hotkeys Menu >>>`t%Showhotkeymenu%, %icons%\hotkeys.ico
 menu, g, add, ; line -------------------------
 menu, g, add, Quit \ Exit`t%exit%, exit
 menu, g, icon, Quit \ Exit`t%exit%, %icons%\exitapp.ico
