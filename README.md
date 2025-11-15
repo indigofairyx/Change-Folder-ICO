@@ -6,7 +6,13 @@ Is a light weight, portable app written in AutoHotkey that allows you to Change 
 > This little app was written to work with `.ico` file extentions!
 > You can set folder icons using `.dll` and\or `.exe` extenions (with extra params), **thou**, these are not full integrated here and have no plans to implament them into Change Folder .Ico 
 
-download in the releases secton --> 
+### Which to Download and Run???
+
+The .zip file contains the AutoHotkey source code, the exe, extracted icons and this repos readme.md files. The Full Package. ***( Recommended )*** Simply Extract and run the `.exe`. Its Ready to go instantly.
+
+The exe is a *self extracting portable installer*. It will extract itself in-place into own folder after which you can place it any where except in the C:\Program Files\** folders. It's the same as the zip without the source code and and readme.md.
+
+download in the [Releases](https://github.com/indigofairyx/Change-Folder-ICO/releases) secton -->
 
 ### more readme update coming soon...
 
