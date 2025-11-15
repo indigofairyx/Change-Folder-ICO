@@ -2,11 +2,15 @@
 
 Is a light weight, portable app written in AutoHotkey that allows you to Change Folder Icons from a Quick and Simple GUI.
 
-download in the realease secton --> 
+> [!note]
+> This little app was written to work with `.ico` file extentions!
+> You can set folder icons using `.dll` and\or `.exe` extenions (with extra params), **thou**, these are not full integrated here and have no plans to implament them into Change Folder .Ico 
 
-more readme update coming soon...
+download in the releases secton --> 
 
-for now... screenshots
+### more readme update coming soon...
+
+for now... screenshots 🡳🡳🡳
 
 # Screenshots
 
